@@ -2,14 +2,14 @@ import random
 from nguyenpanda.swan import Color
 import pygame
 from typing_extensions import Callable
-
-
+import time
+random.seed(5)
 class Board:
     # @formatter:off
     # Small board
-    BOARD_WIDTH_S  = 6
-    BOARD_HEIGHT_S = 6
-    BOARD_MINES_S  = 3
+    BOARD_WIDTH_S  = 9
+    BOARD_HEIGHT_S = 9
+    BOARD_MINES_S  = 10
     # Medium board
     BOARD_WIDTH_M  = 16
     BOARD_HEIGHT_M = 1
@@ -27,7 +27,7 @@ class Board:
         self.__mines_counts = self.BOARD_MINES_S
         self.__board_mines    = [[0] * self.__board_width for _ in range(self.__board_height)]
         self.__board_freq     = [[0] * self.__board_width for _ in range(self.__board_height)]
-        # 0: Neutral 1: Marked 2: Opened
+        # 0: Neutral; 1: Marked;  2: Opened
         self.__board_state    = [[0] * self.__board_width for _ in range(self.__board_height)]
         self.fillBoard(self.__mines_counts)
         self.fillFrequency()
@@ -97,6 +97,7 @@ class Board:
                     neighbourList.append((row + dx, col + dy))
 
         return neighbourList
+
     def get_friendly_neighbours(self, row: int, col: int):
         dX = [-1, 0, 1]
         dY = [-1, 0, 1]
@@ -110,6 +111,36 @@ class Board:
 
         return neighbourList
 
+    def get_frequency_neighbours(self, row:int, col: int):
+        dX = [-1, 0, 1]
+        dY = [-1, 0, 1]
+        neighbourList = []
+        for dx in dX:
+            for dy in dY:
+                if dx == dy == 0: continue
+                if (self.inBoard(row + dx, col + dy) and self.__board_freq[row+dx][col+dy] > 0 and
+                    self.__board_state[row + dx][col + dy] == 2):
+                    neighbourList.append((row + dx, col + dy))
+
+        return neighbourList
+
+    def solved_cell(self, row: int, col: int):
+        """
+        A solve cells is a cell that has all of it's neighbour opened and marked
+        :return:
+        """
+        dX = [-1, 0, 1]
+        dY = [-1, 0, 1]
+        neighbourList = []
+        counter = 0
+        for dx in dX:
+            for dy in dY:
+                if dx == dy == 0: continue
+                if self.inBoard(row + dx, col + dy):
+                    if self.__board_state[row + dx][col + dy] == 0:
+                        return False
+
+        return True
     def inBoard(self, row: int, col:int):
         return 0 <= row < self.__board_height and 0 <= col < self.__board_width
 
@@ -124,16 +155,19 @@ class Board:
                     count += 1
         return safeCells == count
     def printBoards(self):
-        print(Color["r"])
-
+        print(Color["y"])
+        print(Color["y"] + "="*30)
         for row in self.__board_mines:
             print(row)
 
-        print(Color["y"] + "="*30)
+        print(Color["r"] + "="*30)
         print(Color["r"])
         for row in self.__board_freq:
             print(row)
-
+        print(Color["g"] + "="*30)
+        print(Color["g"])
+        for row in self.__board_state:
+            print(row)
     def get_board_mines(self):
         return self.__board_mines
 

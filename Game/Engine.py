@@ -264,7 +264,7 @@ while running:
         boardFreq = board.get_board_freq()
         movesList = AI.get_moves_list() # A reference to the possible moves
         # Makes a move
-        print(movesList)
+        # print(movesList)
         for row, col in AI.make_move():
             choose_cell_AI(row, col, boardState, boardMines, boardFreq, movesList)
 
@@ -351,9 +351,8 @@ while running:
         pass
     if board.winning_check():
         # TODO: ADD WINNING MESSAGE
-        time.sleep(10000)
+        time.sleep(10)
         running = False
-
     time.sleep(1)
 # Quit Pygame
 pygame.quit()
