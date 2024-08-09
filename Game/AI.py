@@ -1,6 +1,9 @@
+import time
+
 from Board import Board
 from nguyenpanda.swan import Color
 from typing_extensions import List
+from Lock import Lock
 import copy
 
 
@@ -13,6 +16,8 @@ class AI:
         self.__boardFreq = board.get_board_freq()
         self.__boardStates = board.get_board_state()
         self.__board_shapes = board.get_board_shape()
+
+
         self.__movesList = []
         self.__markedList = []
         self.__probabilities = [[-1.] * self.__board_shapes[1] for _ in range(self.__board_shapes[0])]
@@ -47,7 +52,6 @@ class AI:
 
             # Loop
             self.__turn += 1
-
             return self.__moves_Return
 
         pass
@@ -77,13 +81,13 @@ class AI:
         self.ruleTwo()
 
         # Only do this if there's no way to avoid having luck involved in decision, well in theory
-        if True:
+        if len(self.__moves_Return) == 0:
             # Generate all possible arrangement
             # key: (row, column) - value: the frequency of that cell
             moveFreq = {}
             for r, c in self.__movesList:
                 moveFreq[(r, c)] = self.__boardFreq[r][c]
-                moveFreq[(r, c)] -= len(self.__board.get_flagged_neighbour(r,c))
+                moveFreq[(r, c)] -= len(self.__board.get_flagged_neighbour(r, c))
 
 
             edgeMine = {}
@@ -96,8 +100,9 @@ class AI:
                 if self.__boardStates[r][c] != 1:
                     edgeList.append((r, c))
             arrangementList = []
-
+            print(Color["b"],edgeList)
             self.generate_arrangement(0, moveFreq, edgeList, edgeMine, arrangementList)
+            print(len(arrangementList))
 
 
 
@@ -192,7 +197,11 @@ class AI:
         #     print(Color["CYAN"] + "\t\t" + "=" * 25, isBomb)
         # # print(Color["b"],temp_freq)
         # print(Color["g"],temp_mine)
-        curr_edge = edgeList[i]
+        try:
+            curr_edge = edgeList[i]
+        except:
+            print("Index:", i)
+            print(edgeList)
         # print("Curr eddge:",curr_edge)
         # If the cell is flagged is guaranteed to be a bomb
         if self.__boardStates[curr_edge[0]][curr_edge[1]] == 1:

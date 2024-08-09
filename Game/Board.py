@@ -3,13 +3,13 @@ from nguyenpanda.swan import Color
 import pygame
 from typing_extensions import Callable
 import time
-random.seed(5)
+# random.seed(5)
 class Board:
     # @formatter:off
     # Small board
-    BOARD_WIDTH_S  = 9
-    BOARD_HEIGHT_S = 9
-    BOARD_MINES_S  = 10
+    BOARD_WIDTH_S  = 30
+    BOARD_HEIGHT_S = 16
+    BOARD_MINES_S  = 99
     # Medium board
     BOARD_WIDTH_M  = 16
     BOARD_HEIGHT_M = 1

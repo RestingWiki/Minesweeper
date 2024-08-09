@@ -1,3 +1,4 @@
+import threading
 from collections import deque
 
 import pygame
@@ -7,9 +8,9 @@ from typing_extensions import List
 
 from Board import Board
 from AI import AI
+from Lock import Lock
 
-# Pygame initialization
-pygame.init()
+
 
 # Constants for the board and window size
 TILE_SIZE = 40
@@ -64,18 +65,13 @@ pygame.display.set_caption("Minesweeper")
 # Create a Board instance
 board = Board()
 
-# Use AI?
-USE_AI: bool = True
-if USE_AI:
-    AI = AI(board)
-
-# Player status
-ALIVE: bool = True
-
 # Game variables
 start_time = time.time()
 total_flags = board.BOARD_MINES_S
 flags_left = total_flags
+
+# Player status
+ALIVE: bool = True
 
 # Seven-segment display segment positions
 SEGMENT_POSITIONS = {
@@ -148,10 +144,6 @@ def draw_top_window():
     draw_seven_segment_time(screen, flags_left, (WIDTH - 140, 10), TOP_WINDOW_HEIGHT - 20)
 
 
-# Main loop
-running: bool = True
-
-
 def unlock_empty_neighbour(row, col, boardState):
     """
     This function is responsible for
@@ -199,6 +191,14 @@ def chooseCell(row, col, boardState, boardMines):
         /_/   \_\___|      |____/ |_|  \___/|_|   |_|
 """
 
+# Use AI?
+USE_AI: bool = True
+ai_thinking = False
+if USE_AI:
+    # Create a lock for threading
+    threadLock = Lock()
+    AI = AI(board)
+
 
 def unlock_empty_neighbour_AI(row: int, col: int, boardState: List, boardFreq: List, movesList: List):
     """
@@ -217,7 +217,7 @@ def unlock_empty_neighbour_AI(row: int, col: int, boardState: List, boardFreq: L
         curr = neighbour.popleft()
         boardState[curr[0]][curr[1]] = 2
         # If it's a numbered cell add it to the list for probability calculation
-        if boardFreq[curr[0]][curr[1]] > 0 and curr not in movesList :
+        if boardFreq[curr[0]][curr[1]] > 0 and curr not in movesList:
             movesList.append(curr)
 
         # Find new neighbours that are not bombs
@@ -253,20 +253,47 @@ def choose_cell_AI(row: int, col: int, boardState: List, boardMines: List, board
             movesList.append(move)
         unlock_empty_neighbour_AI(row, col, boardState, boardFreq, movesList)
 
+
+def ai_calculate_moves(board: Board, AI: AI):
+    global ai_thinking
+    ai_thinking = True  # AI starts thinking
+
+    # Retrieve the current state of the board
+    t_boardState = board.get_board_state()
+    t_boardMines = board.get_board_mines()
+    t_boardFreq = board.get_board_freq()
+    t_movesList = AI.get_moves_list()  # A reference to the possible moves
+    # Makes a move
+    # print(movesList)
+
+    # If AI is think of a move, let it continue
+    moves = AI.make_move()
+    for t_row, t_col in moves:
+        choose_cell_AI(t_row, t_col, t_boardState, t_boardMines, t_boardFreq, t_movesList)
+
+    ai_thinking = False
+
+
+# Pygame initialization
+pygame.init()
+running: bool = True
+count = 0
+# Main loop
 while running:
+    # "If you fail to make a call to the event queue for too long, the system may decide your program has locked up."
+    #  https://stackoverflow.com/questions/20165492/pygame-window-not-responding-after-a-few-seconds
+    #  use pygame.event.pump
+    pygame.event.pump()
+    print("Running")
     """
-    
+
     """
     if USE_AI:
-        # Retrieve the current state of the board
-        boardState = board.get_board_state()
-        boardMines = board.get_board_mines()
-        boardFreq = board.get_board_freq()
-        movesList = AI.get_moves_list() # A reference to the possible moves
-        # Makes a move
-        # print(movesList)
-        for row, col in AI.make_move():
-            choose_cell_AI(row, col, boardState, boardMines, boardFreq, movesList)
+        if ai_thinking:
+            continue
+        else:
+            ai_thread = threading.Thread(target=ai_calculate_moves, args=(board, AI))
+            ai_thread.start()
 
     # Player event handling
     elif not USE_AI:
@@ -304,6 +331,7 @@ while running:
     draw_top_window()
 
     # Draw the Minesweeper board
+
     for row in range(board.BOARD_HEIGHT_S):
         for col in range(board.BOARD_WIDTH_S):
             # Create a rectangle for each tile
@@ -344,15 +372,20 @@ while running:
                 raise Exception("How did we get here?!")
 
     # Update the display
-    pygame.display.flip()
+    if not ai_thinking or count == 1:
+        pygame.display.flip()
     if not ALIVE:
         # TODO: ADD DEATH MESSAGE
+        print("You ded")
+        time.sleep(10)
         running = False
         pass
     if board.winning_check():
         # TODO: ADD WINNING MESSAGE
+        print("You won")
         time.sleep(10)
         running = False
     time.sleep(1)
+    count = 1
 # Quit Pygame
 pygame.quit()
