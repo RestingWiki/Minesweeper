@@ -3,7 +3,6 @@ import time
 from Board import Board
 from nguyenpanda.swan import Color
 from typing_extensions import List
-from Lock import Lock
 import copy
 
 

@@ -8,7 +8,6 @@ from typing_extensions import List
 
 from Board import Board
 from AI import AI
-from Lock import Lock
 
 
 
@@ -193,10 +192,10 @@ def chooseCell(row, col, boardState, boardMines):
 
 # Use AI?
 USE_AI: bool = True
-ai_thinking = False
+ai_delay: int = 1
+ai_thinking: bool = False
 if USE_AI:
     # Create a lock for threading
-    threadLock = Lock()
     AI = AI(board)
 
 
@@ -385,7 +384,8 @@ while running:
         print("You won")
         time.sleep(10)
         running = False
-    time.sleep(1)
+
+    time.sleep(ai_delay)
     count = 1
 # Quit Pygame
 pygame.quit()

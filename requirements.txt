@@ -1,0 +1,2 @@
+nguyenpanda~=0.1.8
+pygame~=2.6.0

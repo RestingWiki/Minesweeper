@@ -6,19 +6,20 @@ import time
 # random.seed(5)
 class Board:
     # @formatter:off
+    # Board settings
     # Small board
     BOARD_WIDTH_S  = 30
     BOARD_HEIGHT_S = 16
     BOARD_MINES_S  = 99
-    # Medium board
-    BOARD_WIDTH_M  = 16
-    BOARD_HEIGHT_M = 1
-    BOARD_MINES_M  = 40
-    # Large board
-    BOARD_WIDTH_L  = 30
-    BOARD_HEIGHT_L = 1
-    BOARD_MINES_L  = 99
-    # @formatter: on
+    # # Medium board
+    # BOARD_WIDTH_M  = 16
+    # BOARD_HEIGHT_M = 1
+    # BOARD_MINES_M  = 40
+    # # Large board
+    # BOARD_WIDTH_L  = 30
+    # BOARD_HEIGHT_L = 1
+    # BOARD_MINES_L  = 99
+    # # @formatter: on
 
 
     def __init__(self):
